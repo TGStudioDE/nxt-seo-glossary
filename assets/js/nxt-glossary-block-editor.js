@@ -95,4 +95,4 @@
             return null;
         }
     });
-})(window.wp); 
+})(window.wp);
