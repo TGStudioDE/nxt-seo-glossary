@@ -14,9 +14,11 @@ class NXT_Glossary_Block {
     }
 
     public function register_block() {
-        // Register block type with simplified approach
+        // Register block type
         register_block_type('nxt-seo-glossary/glossary', [
-            'render_callback' => [$this, 'render_shortcode'], // Use the same function as the shortcode
+            'editor_script' => 'nxt-glossary-block-editor',
+            'editor_style' => 'nxt-glossary-block-editor',
+            'render_callback' => [$this, 'render_shortcode'],
             'attributes' => [
                 'initialCount' => [
                     'type' => 'number',
@@ -55,13 +57,7 @@ class NXT_Glossary_Block {
     }
 
     public function enqueue_frontend_assets() {
-        wp_enqueue_style(
-            'nxt-glossary-block-frontend',
-            NXT_SEO_GLOSSARY_PLUGIN_URL . 'assets/css/nxt-glossary-block-frontend.css',
-            [],
-            NXT_SEO_GLOSSARY_VERSION
-        );
-
+        // Nur das JavaScript laden, kein CSS
         wp_enqueue_script(
             'nxt-glossary-block-frontend',
             NXT_SEO_GLOSSARY_PLUGIN_URL . 'assets/js/nxt-glossary-block-frontend.js',
@@ -111,71 +107,8 @@ class NXT_Glossary_Block {
             ];
         }
         
-        // Basic CSS for the glossary
-        $output = '<style>
-            .nxt-glossary-container {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 20px;
-            }
-            .nxt-glossary-search {
-                margin-bottom: 20px;
-            }
-            .nxt-glossary-search-input {
-                width: 100%;
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-            }
-            .nxt-glossary-terms {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                gap: 20px;
-                margin-bottom: 20px;
-            }
-            .nxt-glossary-term {
-                background: #fff;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            .nxt-glossary-term-title {
-                margin-top: 0;
-                color: #333;
-            }
-            .nxt-glossary-term-content {
-                color: #666;
-            }
-            .nxt-glossary-term details {
-                border: none;
-            }
-            .nxt-glossary-term summary {
-                cursor: pointer;
-                list-style: none;
-            }
-            .nxt-glossary-term summary::-webkit-details-marker {
-                display: none;
-            }
-            .nxt-glossary-pagination {
-                margin-top: 20px;
-                text-align: center;
-            }
-            .nxt-glossary-load-more {
-                background: #2271b1;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 16px;
-            }
-            .nxt-glossary-load-more:hover {
-                background: #135e96;
-            }
-        </style>';
-        
         // Container start with added data attributes for JS initialization
-        $output .= '<div class="nxt-glossary-container nxt-glossary-block" id="nxt-glossary-block-container" 
+        $output = '<div class="nxt-glossary-container" id="nxt-glossary-block-container" 
             data-initial-count="' . esc_attr($attributes['initialCount']) . '" 
             data-sort-by="' . esc_attr($attributes['sortBy']) . '" 
             data-sort-order="' . esc_attr($attributes['sortOrder']) . '" 
@@ -184,7 +117,7 @@ class NXT_Glossary_Block {
         // Search bar
         if ($attributes['showSearch']) {
             $output .= '<div class="nxt-glossary-search">
-                <input type="text" class="nxt-glossary-search-input" placeholder="Search terms...">
+                <input type="text" class="nxt-glossary-search-input" placeholder="' . esc_attr__('Search terms...', 'nxt-seo-glossary') . '">
             </div>';
         }
         
@@ -205,8 +138,8 @@ class NXT_Glossary_Block {
             while ($query->have_posts()) {
                 $query->the_post();
                 $title = get_the_title();
-                $excerpt = wp_trim_words(get_the_content(), 30);
-                $content = get_the_content();
+                $excerpt = wp_trim_words(wp_strip_all_tags(get_the_content()), 30);
+                $content = apply_filters('the_content', get_the_content());
                 
                 $output .= '<div class="nxt-glossary-term">
                     <details>
@@ -214,12 +147,12 @@ class NXT_Glossary_Block {
                             <h3 class="nxt-glossary-term-title">' . esc_html($title) . '</h3>
                             <div class="nxt-glossary-term-excerpt">' . esc_html($excerpt) . '</div>
                         </summary>
-                        <div class="nxt-glossary-term-content">' . wp_kses_post($content) . '</div>
+                        <div class="nxt-glossary-term-content">' . $content . '</div>
                     </details>
                 </div>';
             }
         } else {
-            $output .= '<p>No glossary terms found. Please add some terms to the glossar post type.</p>';
+            $output .= '<p>' . esc_html__('No glossary terms found. Please add some terms to the glossar post type.', 'nxt-seo-glossary') . '</p>';
         }
         
         $output .= '</div>'; // Close terms container
@@ -227,7 +160,7 @@ class NXT_Glossary_Block {
         // Add Load More button for pagination
         if ($query->max_num_pages > 1) {
             $output .= '<div class="nxt-glossary-pagination">
-                <button class="nxt-glossary-load-more">Load More Terms</button>
+                <button class="nxt-glossary-load-more">' . esc_html__('Load More Terms', 'nxt-seo-glossary') . '</button>
             </div>';
         }
         
@@ -236,4 +169,4 @@ class NXT_Glossary_Block {
         wp_reset_postdata();
         return $output;
     }
-} 
+}
