@@ -1,0 +1,13 @@
+.nxt-glossary-block-editor {
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px dashed #ddd;
+    border-radius: 4px;
+}
+
+.nxt-glossary-block-placeholder {
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+    padding: 20px;
+} 
