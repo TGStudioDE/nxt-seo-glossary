@@ -36,11 +36,12 @@ class NXT_Glossary_Ajax {
                     'id' => get_the_ID(),
                     'title' => get_the_title(),
                     'excerpt' => wp_trim_words(wp_strip_all_tags(get_the_content()), 30),
-                    'content' => get_the_content()
+                    'content' => apply_filters('the_content', get_the_content())
                 ];
             }
         }
 
+        wp_reset_postdata();
         wp_send_json_success($results);
     }
 
@@ -70,14 +71,15 @@ class NXT_Glossary_Ajax {
                     'id' => get_the_ID(),
                     'title' => get_the_title(),
                     'excerpt' => wp_trim_words(wp_strip_all_tags(get_the_content()), 30),
-                    'content' => get_the_content()
+                    'content' => apply_filters('the_content', get_the_content())
                 ];
             }
         }
 
+        wp_reset_postdata();
         wp_send_json_success([
             'terms' => $results,
             'has_more' => $page < $query->max_num_pages
         ]);
     }
-} 
+}
