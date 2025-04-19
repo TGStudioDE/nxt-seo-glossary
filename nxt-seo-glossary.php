@@ -34,4 +34,26 @@ function nxt_seo_glossary_init() {
     new NXT_Glossary_Block();
     new NXT_Glossary_Ajax();
 }
-add_action('init', 'nxt_seo_glossary_init'); 
+add_action('init', 'nxt_seo_glossary_init');
+
+// Debug function to help diagnose issues
+function nxt_glossary_debug_info() {
+    if (current_user_can('manage_options') && isset($_GET['nxt_debug'])) {
+        echo '<div style="background: #f8f8f8; border: 1px solid #ddd; padding: 15px; margin: 15px; position: fixed; bottom: 0; right: 0; z-index: 9999; max-width: 500px;">';
+        echo '<h3>NXT Glossary Debug Info</h3>';
+        
+        // Check if post type exists
+        $post_types = get_post_types([], 'names');
+        echo '<p>Glossar post type registered: ' . (in_array('glossar', $post_types) ? 'Yes' : 'No') . '</p>';
+        
+        // Count glossary terms
+        $terms_count = wp_count_posts('glossar');
+        echo '<p>Glossary terms count: ' . ($terms_count ? $terms_count->publish : '0') . '</p>';
+        
+        // Check if scripts are enqueued
+        echo '<p>Frontend script handle: ' . (wp_script_is('nxt-glossary-block-frontend', 'enqueued') ? 'Enqueued' : 'Not enqueued') . '</p>';
+        
+        echo '</div>';
+    }
+}
+add_action('wp_footer', 'nxt_glossary_debug_info');
